@@ -9,7 +9,7 @@ import { UserGuard } from './components/user.guard';
 const routes: Routes = [
   { path: 'hotels/:ca', component: HotelsComponent},
   { path : 'login' , component : LoginoutComponent},
-  { path : 'hotel/:id' , component : HotelComponent,canActivate : [UserGuard]},
+  { path : 'hotel/:id' , component : HotelComponent},
   { path : '' , redirectTo : 'hotels/0', pathMatch : 'full' },
   { path: '404', component: NotFoundComponent},
   { path: '**', redirectTo: '/404'}

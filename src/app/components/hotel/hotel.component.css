@@ -1,0 +1,11 @@
+.enlarged-image {
+    width: 100%; /* Vous pouvez ajuster la largeur selon vos besoins */
+    max-height: 400px; /* Vous pouvez ajuster la hauteur selon vos besoins */
+    object-fit: cover; /* Pour redimensionner l'image tout en conservant son rapport d'aspect */
+    border-radius: 20px;
+  }
+
+  .stars-container-horizontal {
+    display: flex;
+    align-items: center;
+  }

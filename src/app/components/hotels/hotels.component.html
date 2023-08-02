@@ -7,12 +7,13 @@
         <div *ngFor="let hotel of listHotels" class="mb-4 flex-fill">
           <div class="card" style="width: 350px; margin-right: 10px; margin-bottom: 10px;">
             <img
-              class="img-thumbnail img-rounded btn"
+            class="img-thumbnail btn"
+            style="border-radius: 20px;"
               (click)="onHotelDetail(hotel)"
               [src]="host + '/photo/' + hotel.id"
             />
             <div class="card-body">
-              <div *ngIf="this.authService.isAdmin()">
+              <!-- <div *ngIf="this.authService.isAdmin()">
                 <button (click)="onEditPhoto(hotel)">
                   <span class="fa fa-download"></span>
                 </button>
@@ -21,16 +22,20 @@
                   <button class="btn btn-success" (click)="uploadPhoto()">Upload</button>
                   {{ progress }}
                 </p>
-              </div>
+              </div> -->
               <h5 class="card-title">{{ hotel.name }}</h5>
-              <div>{{ hotel.address }}</div>
-              <div>{{ hotel.phone }}</div>
-              <div class="stars-container">
+                 <div class="stars-container">
                 <div *ngFor="let star of getStars(hotel.stars)">
                   <i class="bi bi-star-fill text-warning"></i>
                 </div>
               </div>
-              <div>{{ hotel.price }}</div>
+              <div>{{ hotel.city.name }}</div>
+              <div>Chambre disponible : {{ hotel.numberOfRoom }}</div>
+              <div class="d-flex justify-content-between">
+                <div>
+                </div>
+                <div>{{ hotel.price }} €</div>
+              </div>
               <div *ngIf="this.authService.isAdmin()">
                 <a class="btn btn-danger" (click)="onDeleteHotel(hotel)">delete</a>
                 <a class="btn btn-secondary" (click)="onUpdateHotel(hotel)">update</a>
