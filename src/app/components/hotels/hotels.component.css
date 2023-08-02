@@ -1,0 +1,7 @@
+.stars-container {
+    display: flex;
+  }
+  
+.stars-container i {
+    margin-right: 5px;
+  }
