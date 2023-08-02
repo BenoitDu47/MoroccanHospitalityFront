@@ -1,1 +1,27 @@
-<p>hotel works!</p>
+<div class="container" *ngIf="hotel">
+  <div class="d-flex align-items-center">
+    <h2 class="mr-2">{{ hotel.name }}  </h2>
+    <div class="stars-container stars-container-horizontal" *ngIf="hotel.stars">
+      <div *ngFor="let star of getStars(hotel.stars)">
+        <i class="bi bi-star-fill text-warning"></i>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      <img class="img-thumbnail btn enlarged-image" [src]="host + '/photo/' + hotel.id" />
+    </div>
+    <div class="col-md-6 d-flex flex-column justify-content-between">
+      <div>
+        <div><p><i class="bi bi-geo-alt-fill"></i> {{ hotel.address }}</p></div>
+        <div><p><i class="bi bi-telephone-fill"></i> {{ hotel.phone }}</p></div>
+        <div><p>Chambre disponible : {{ hotel.numberOfRoom }}</p></div>
+      </div>
+      <div class="d-flex flex-column align-items-end">
+        <div><h5>{{ hotel.price }} €</h5></div>
+        <!-- Bouton "Réserver" -->
+        <button class="btn btn-primary mt-3">Réserver</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -11,9 +11,6 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
 
-  
- 
-  
   constructor(private http:HttpClient, private auth : AuthenticateService) { }
 
   public getHotels() {
@@ -42,6 +39,10 @@ export class ApiService {
         headers:new HttpHeaders({'Authorization': this.auth.getToken()})
       } );
     return this.http.request(req);
+  }
+
+  public getHotelById(id: number) {
+    return this.http.get<Hotel>(environment.host+"/hotel/" + id);
   }
 
 }

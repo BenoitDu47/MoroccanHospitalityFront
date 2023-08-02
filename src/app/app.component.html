@@ -1,7 +1,8 @@
 <nav class="navbar navbar-expand-sm navbar-light" style="border-bottom: 2px solid #ccc;">
   <a class="navbar-brand ms-5" href="#">
-    <span class="text-success">MOROCCAN</span> 
-    <span class="text-primary">HOSPITALITY</span>
+    <h3>    <span class="text-success">MOROCCAN</span> 
+    <span class="text-primary">HOSPITALITY</span></h3>
+
   </a>
   
   <ul class="navbar-nav ms-auto">
@@ -15,15 +16,14 @@
 </nav>
 
 <ng-container *ngIf="showMessage">
-  <!-- Le texte affiché pendant 15 secondes -->
-  <div>
-    <p>Ceci est un texte affiché pendant 15 secondes après votre première visite sur la page.</p>
+  <div class="text-center my-4">
+    <h6><span class="text-success fw-bold">Explorez le maroc avec style</span> Trouvez l'hôtel parfait pour votre prochaine aventure et laisser nous vous guider vers une hospitalité incomparable.</h6>
   </div>
 </ng-container>
 
 <div class="container">
   <div class="list-group list-group-horizontal" style="background-color: #fff; border-bottom: 2px solid #ccc; margin-bottom: 25px; margin-top: 25px;" *ngIf="listCity">
-    <a [ngClass]="currentCity==c?'active':''" (click)="getHotelsByCity(c)" class="list-group-item list-group-item-action clickable flex-fill no-border city-link" *ngFor="let c of listCity">{{c.name}}</a>
+    <a [ngClass]="currentCity==c?'active':''" (click)="getHotelsByCity(c)" class="list-group-item list-group-item-action clickable flex-fill no-border city-link text-center" *ngFor="let c of listCity">{{c.name}}</a>
   </div>
 
   <div>

@@ -25,7 +25,7 @@ export class AppComponent {
     if (this.isFirstVisit) {
       setTimeout(() => {
         this.showMessage = false;
-      }, 15000); // 15 secondes
+      }, 10000); // 10 secondes
       this.isFirstVisit = false;
     }
   }

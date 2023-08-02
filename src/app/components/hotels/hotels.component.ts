@@ -62,7 +62,7 @@ export class HotelsComponent implements OnInit {
   }
   
   onHotelDetail(hotel: Hotel) {
-    this.router.navigateByUrl('hotel-zoom/' + hotel.id); // ToDo afficher l'image associée pour modification
+    this.router.navigateByUrl('hotel/' + hotel.id);
   }
   
   onEditPhoto(hotel: Hotel) {
