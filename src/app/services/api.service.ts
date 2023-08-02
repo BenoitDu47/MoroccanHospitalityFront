@@ -11,7 +11,18 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
 
+
   constructor(private http:HttpClient, private auth : AuthenticateService) { }
+  public createHotel(hotelData: Hotel): Observable<Hotel> {
+    // On enlève l'ID du formulaire pour la création d'un nouvel hôtel
+    return this.http.post<Hotel>(environment.host + "/hotel-form", hotelData, { headers: new HttpHeaders({ 'Authorization': this.auth.getToken() }) });
+  }
+
+  public updateHotel(hotelData: Hotel): Observable<Hotel> {
+    const id = hotelData.id;
+    return this.http.put<Hotel>(environment.host + "/hotel-form/" + id, hotelData, { headers: new HttpHeaders({ 'Authorization': this.auth.getToken() }) });
+  }
+
 
   public getHotels() {
     return this.http.get<Hotel[]>(environment.host+"/hotels");

@@ -58,7 +58,7 @@ export class HotelsComponent implements OnInit {
   }
 
   onUpdateHotel(hotel: Hotel) {
-    this.router.navigateByUrl('hotel/' + hotel.id);
+    this.router.navigateByUrl('hotel-form/' + hotel.id);
   }
   
   onHotelDetail(hotel: Hotel) {
