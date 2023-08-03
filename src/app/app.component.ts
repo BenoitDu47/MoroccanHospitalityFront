@@ -47,5 +47,9 @@ export class AppComponent {
     this.currentCity = undefined;
     this.router.navigateByUrl("/hotels/0");
   }
+
+  onCreateHotel() {
+    this.router.navigateByUrl('hotel-form');
+  }
   
 }

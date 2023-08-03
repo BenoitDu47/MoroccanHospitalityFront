@@ -4,11 +4,14 @@
     <span class="text-primary">HOSPITALITY</span></h3>
 
   </a>
-  
+      <div *ngIf="this.authService.isAdmin()">
+      <a class="nav-link" href="#" (click)="onCreateHotel()">Créer un Hôtel</a>
+      </div>
   <ul class="navbar-nav ms-auto">
     <li *ngIf="this.authService.isConnected()">
       <label>{{this.authService.getUser().username}}</label>
     </li>
+
     <li>
       <a class="nav-link" href="#" routerLink="/login">{{this.authService.isConnected() ? 'Deconnexion' : 'Connexion'}}</a>
     </li>

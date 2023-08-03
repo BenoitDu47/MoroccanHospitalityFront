@@ -10,7 +10,8 @@ import { HotelFormComponent } from './components/hotel-form/hotel-form.component
 const routes: Routes = [
   { path: 'hotels/:ca', component: HotelsComponent},
   { path : 'login' , component : LoginoutComponent},
-  { path : 'hotel-form/:id', component: HotelFormComponent, canActivate : [UserGuard] },
+  { path : 'hotel-form', component: HotelFormComponent, canActivate : [UserGuard] },
+    { path : 'hotel-form/:id', component: HotelFormComponent, canActivate : [UserGuard] },
   { path : 'hotel/:id' , component : HotelComponent},
   { path : '' , redirectTo : 'hotels/0', pathMatch : 'full' },
   { path: '404', component: NotFoundComponent},

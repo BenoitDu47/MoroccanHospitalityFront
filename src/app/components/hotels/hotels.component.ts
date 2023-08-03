@@ -74,8 +74,8 @@ export class HotelsComponent implements OnInit {
     this.selectedFiles = event.target.files;
   }
 
-  getAllHotelsByCity(idCat : number) {
-    this.apiService.getHotelsByCity(idCat).subscribe({
+  getAllHotelsByCity(idCity : number) {
+    this.apiService.getHotelsByCity(idCity).subscribe({
       next : (data) => this.listHotels = data,
       error : (err) => this.error = "Pb de chargement",
       complete : () => this.error = ""
