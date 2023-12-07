@@ -1,0 +1,441 @@
+From ab16976d5ea1442f2e7da567e454a7990c7b7cd6 Mon Sep 17 00:00:00 2001
+From: ALLAGNAT Matthieu <matthieu.allagnat.external@airbus.com>
+Date: Thu, 7 Dec 2023 12:02:43 +0100
+Subject: [PATCH] =?UTF-8?q?[Test=20front]=20R=C3=A9sultat=20presentation?=
+=?UTF-8?q?=20matthieu?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+ 
+---
+src/app/components/hotel/hotel.component.html |   3 +-
+.../components/hotel/hotel.component.spec.ts  |  43 +++++-
+src/app/components/hotel/hotel.component.ts   |  37 +++--
+.../hotels/hotels.component.spec.ts           |   8 +-
+src/app/components/hotels/hotels.component.ts | 129 ++++++++++--------
+src/app/model/mocks/hotelMock.ts              |  14 ++
+src/app/services/api.service.mock.ts          |  16 +++
+src/app/services/api.service.spec.ts          |   6 +-
+8 files changed, 176 insertions(+), 80 deletions(-)
+create mode 100644 src/app/model/mocks/hotelMock.ts
+create mode 100644 src/app/services/api.service.mock.ts
+ 
+diff --git a/src/app/components/hotel/hotel.component.html b/src/app/components/hotel/hotel.component.html
+index 8111e9a..1a92d79 100644
+--- a/src/app/components/hotel/hotel.component.html
++++ b/src/app/components/hotel/hotel.component.html
+@@ -19,7 +19,8 @@
+</div>
+<div class="d-flex flex-column align-items-end">
+<div><h5>{{ hotel.price }} €</h5></div>
+-        <button class="btn btn-primary mt-3">Réserver</button>
++        <button class="btn btn-primary mt-3" (click)="onClickButton()">Réserver</button>
++        <textarea (input)="onInputText()">Texte de base</textarea>
+</div>
+</div>
+</div>
+diff --git a/src/app/components/hotel/hotel.component.spec.ts b/src/app/components/hotel/hotel.component.spec.ts
+index 89c14a7..b15fc1e 100644
+--- a/src/app/components/hotel/hotel.component.spec.ts
++++ b/src/app/components/hotel/hotel.component.spec.ts
+@@ -1,6 +1,14 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HotelComponent } from './hotel.component';
++import { RouterModule } from '@angular/router';
++import { ApiService } from 'src/app/services/api.service';
++import { HttpClientTestingModule } from '@angular/common/http/testing';
++import { AuthenticateService } from 'src/app/services/authenticate.service';
++import { Hotel } from 'src/app/model/hotel.model';
++import { City } from 'src/app/model/city.model';
++import { mockHotel } from 'src/app/model/mocks/hotelMock';
++import { ApiServiceMock } from 'src/app/services/api.service.mock';
+describe('HotelComponent', () => {
+   let component: HotelComponent;
+@@ -8,7 +16,12 @@ describe('HotelComponent', () => {
+   beforeEach(() => {
+     TestBed.configureTestingModule({
+-      declarations: [HotelComponent]
++      declarations: [HotelComponent],
++      imports: [RouterModule.forRoot([]), HttpClientTestingModule],
++      providers: [
++        { provide: ApiService, useClass: ApiServiceMock },
++        AuthenticateService,
++      ],
+     });
+     fixture = TestBed.createComponent(HotelComponent);
+     component = fixture.componentInstance;
+@@ -18,4 +31,32 @@ describe('HotelComponent', () => {
+   it('should create', () => {
+     expect(component).toBeTruthy();
+   });
++
++  describe('suite de tests pour test', () => {
++    it('should have a defined host', () => {
++      expect(component.host).toEqual('http://localhost:8080');
++    });
++    it('should have a Reserver button', () => {
++      //component.hotel = mockHotel;
++      fixture.detectChanges();
++      const button: HTMLElement = fixture.nativeElement.querySelector('button');
++      expect(button.innerHTML).toEqual('Réserver');
++      expect(component.buttonClicked === false);
++      button.click();
++      expect(component.buttonClicked === true);
++    });
++    it('should have a TextField', () => {
++      spyOn(component, 'onInputText');
++      //component.hotel = mockHotel;
++      fixture.detectChanges();
++      const textarea: HTMLElement =
++        fixture.nativeElement.querySelector('textarea');
++      expect(textarea.textContent).toEqual('Texte de base');
++      textarea.textContent = 'Texte modifié';
++      textarea.dispatchEvent(new Event('input'));
++      expect(textarea.textContent).toEqual('Texte modifié');
++      expect(component.onInputText).toHaveBeenCalledTimes(1);
++    });
++  });
+});
++
+diff --git a/src/app/components/hotel/hotel.component.ts b/src/app/components/hotel/hotel.component.ts
+index 627714d..d52e1a2 100644
+--- a/src/app/components/hotel/hotel.component.ts
++++ b/src/app/components/hotel/hotel.component.ts
+@@ -9,28 +9,30 @@ import { environment } from 'src/environments/environment';
+@Component({
+   selector: 'app-hotel',
+   templateUrl: './hotel.component.html',
+-  styleUrls: ['./hotel.component.css']
++  styleUrls: ['./hotel.component.css'],
+})
+export class HotelComponent implements OnInit {
+   hotel: Hotel | undefined;
+   error: string | undefined;
+-  host : string = "";
+-  cities : City[] = [];
++  host: string = '';
++  cities: City[] = [];
++  buttonClicked = false;
+   constructor(
+     private router: Router,
+     private route: ActivatedRoute,
+     private apiService: ApiService,
+     public authService: AuthenticateService
+-  ) {this.getAllCities()}
+-
++  ) {
++    this.getAllCities();
++  }
+   getAllCities() {
+     this.apiService.getCities().subscribe({
+-      next : (data) => this.cities = data,
+-      error : (err) => this.error = "Pb de chargement",
+-      complete : () => this.error = ""
+-    })
++      next: (data) => (this.cities = data),
++      error: (err) => (this.error = 'Pb de chargement'),
++      complete: () => (this.error = ''),
++    });
+   }
+   ngOnInit(): void {
+@@ -48,26 +50,31 @@ export class HotelComponent implements OnInit {
+         this.error = "Pb de chargement des détails de l'hôtel";
+       },
+       complete: () => {
+-        this.error = "";
+-      }
++        this.error = '';
++      },
+     });
+   }
+   getStars(stars: number): number[] {
+     return Array(stars).fill(0);
+   }
+-  
+   onDeleteHotel(hotel: Hotel) {
+-    if (confirm("Vous êtes sûr de vouloir supprimer cet hôtel ?")) {
++    if (confirm('Vous êtes sûr de vouloir supprimer cet hôtel ?')) {
+       this.apiService.deleteHotel(hotel).subscribe({
+         next: (data) => console.log(data),
+-        error: (err) => this.error = err.error.cause.localizedMessage, // ToDo : personnaliser le traitement des erreurs côté serveur
++        error: (err) => (this.error = err.error.cause.localizedMessage), // ToDo : personnaliser le traitement des erreurs côté serveur
+         complete: () => {
+           this.router.navigateByUrl('/'); // Redirection vers la page d'accueil après suppression
+-        }
++        },
+       });
+     }
+   }
++  onClickButton() {
++    this.buttonClicked = !this.buttonClicked;
++  }
++  onInputText() {
++    console.log('textInput');
++  }
+}
+diff --git a/src/app/components/hotels/hotels.component.spec.ts b/src/app/components/hotels/hotels.component.spec.ts
+index eb12019..64dd543 100644
+--- a/src/app/components/hotels/hotels.component.spec.ts
++++ b/src/app/components/hotels/hotels.component.spec.ts
+@@ -1,6 +1,10 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HotelsComponent } from './hotels.component';
++import { ApiService } from 'src/app/services/api.service';
++import { AuthenticateService } from 'src/app/services/authenticate.service';
++import { HttpClientTestingModule } from '@angular/common/http/testing';
++import { RouterModule } from '@angular/router';
+describe('HotelsComponent', () => {
+   let component: HotelsComponent;
+@@ -8,7 +12,9 @@ describe('HotelsComponent', () => {
+   beforeEach(() => {
+     TestBed.configureTestingModule({
+-      declarations: [HotelsComponent]
++      declarations: [HotelsComponent],
++      imports: [RouterModule.forRoot([]), HttpClientTestingModule],
++      providers: [ApiService, AuthenticateService],
+     });
+     fixture = TestBed.createComponent(HotelsComponent);
+     component = fixture.componentInstance;
+diff --git a/src/app/components/hotels/hotels.component.ts b/src/app/components/hotels/hotels.component.ts
+index c7d1f42..89fe5b3 100644
+--- a/src/app/components/hotels/hotels.component.ts
++++ b/src/app/components/hotels/hotels.component.ts
+@@ -10,114 +10,123 @@ import { environment } from 'src/environments/environment';
+@Component({
+   selector: 'app-hotels',
+   templateUrl: './hotels.component.html',
+-  styleUrls: ['./hotels.component.css']
++  styleUrls: ['./hotels.component.css'],
+})
+export class HotelsComponent implements OnInit {
+-  listHotels : Hotel[] | undefined;
+-  error : string | undefined;
+-  editPhoto : boolean | undefined;
+-  host : string = "";
+-  currentHotel : any;
+-  selectedFiles : any;
+-  progress : number | undefined;
+-  currentFileUpload : any;
+-  idCity : number = 0;
+-  cities : City[] = [];
++  listHotels: Hotel[] | undefined;
++  error: string | undefined;
++  editPhoto: boolean | undefined;
++  host: string = '';
++  currentHotel: any;
++  selectedFiles: any;
++  progress: number | undefined;
++  currentFileUpload: any;
++  idCity: number = 0;
++  cities: City[] = [];
+-  constructor(private router : Router, 
+-    private apiService : ApiService, public authService : AuthenticateService, 
+-    public route : ActivatedRoute) {
+-  }
++  constructor(
++    private router: Router,
++    private apiService: ApiService,
++    public authService: AuthenticateService,
++    public route: ActivatedRoute
++  ) {}
+   ngOnInit(): void {
+     this.host = environment.host;
+-    this.router.events.subscribe( nav => {    //on observe chaque évènement sur le routeur qui redirige vers le composant trainings
+-      if(nav instanceof NavigationEnd) {      //on vérifie si la navigation s'est finalisé correctement
++    this.router.events.subscribe((nav) => {
++      //on observe chaque évènement sur le routeur qui redirige vers le composant trainings
++      if (nav instanceof NavigationEnd) {
++        //on vérifie si la navigation s'est finalisé correctement
+         this.idCity = this.route.snapshot.params['ca']; //on récupère l'id de la catégorie positionné dans le composant principal
+         this.refreshScreen();
+       }
+-    })
+-    this.getAllHotels();   //par défaut, on affiche toutes les formations
+-    this.getAllCities();  
++    });
++    this.getAllHotels(); //par défaut, on affiche toutes les formations
++    this.getAllCities();
+   }
+- 
++
+   getAllHotels() {
+     this.apiService.getHotels().subscribe({
+-      next : (data) => this.listHotels = data,
+-      error : (err) => this.error = "Pb de chargement",
+-      complete : () => this.error = ""
+-    })
++      next: (data) => (this.listHotels = data),
++      error: (err) => (this.error = 'Pb de chargement'),
++      complete: () => (this.error = ''),
++    });
+   }
+   getAllCities() {
+     this.apiService.getCities().subscribe({
+-      next : (data) => this.cities = data,
+-      error : (err) => this.error = "Pb de chargement",
+-      complete : () => this.error = ""
+-    })
++      next: (data) => (this.cities = data),
++      error: (err) => (this.error = 'Pb de chargement'),
++      complete: () => (this.error = ''),
++    });
+   }
+   onUpdateHotel(hotel: Hotel) {
+     this.router.navigateByUrl('hotel-form/' + hotel.id);
+   }
+-  
++
+   onHotelDetail(hotel: Hotel) {
+     this.router.navigateByUrl('hotel/' + hotel.id);
+   }
+-  
++
+   onEditPhoto(hotel: Hotel) {
+     this.currentHotel = hotel;
+     this.editPhoto = true;
+   }
+-  
++
+   onSelectedFile(event: any) {
+     this.selectedFiles = event.target.files;
+   }
+-  getAllHotelsByCity(idCity : number) {
++  getAllHotelsByCity(idCity: number) {
+     this.apiService.getHotelsByCity(idCity).subscribe({
+-      next : (data) => this.listHotels = data,
+-      error : (err) => this.error = "Pb de chargement",
+-      complete : () => this.error = ""
+-    })
++      next: (data) => (this.listHotels = data),
++      error: (err) => (this.error = 'Pb de chargement'),
++      complete: () => (this.error = ''),
++    });
+   }
+-  refreshScreen(){
+-    if(this.idCity > 0) this.getAllHotelsByCity(this.idCity); //on affiche toutes les formations d'une catégorie
+-    else this.getAllHotels();  //ou toutes les formations
++  refreshScreen() {
++    if (this.idCity > 0)
++      this.getAllHotelsByCity(
++        this.idCity
++      ); //on affiche toutes les formations d'une catégorie
++    else this.getAllHotels(); //ou toutes les formations
+   }
+   onDeleteHotel(hotel: Hotel) {
+-    if (confirm("Vous êtes sûr de vouloir supprimer cet hôtel ?")) {
++    if (confirm('Vous êtes sûr de vouloir supprimer cet hôtel ?')) {
+       this.apiService.deleteHotel(hotel).subscribe({
+         next: (data) => console.log(data),
+-        error: (err) => this.error = err.error.cause.localizedMessage, // ToDo : personnaliser le traitement des erreurs côté serveur
+-        complete: () => this.refreshScreen()
++        error: (err) => (this.error = err.error.cause.localizedMessage), // ToDo : personnaliser le traitement des erreurs côté serveur
++        complete: () => this.refreshScreen(),
+       });
+     }
+   }
+-  
+-  
++
+   uploadPhoto() {
+     this.progress = 0;
+     this.currentFileUpload = this.selectedFiles.item(0); // on peut uploader le 1er fichier sélectionné
+-    this.apiService.uploadPhoto(this.currentFileUpload, this.currentHotel.id).subscribe({
+-      next: (event) => {
+-        if (event.type === HttpEventType.UploadProgress) {
+-          if (event.total) {
+-            this.progress = Math.round(100 * event.loaded / event.total);
+-          } else {
+-            console.log("handle illegal state");
++    this.apiService
++      .uploadPhoto(this.currentFileUpload, this.currentHotel.id)
++      .subscribe({
++        next: (event) => {
++          if (event.type === HttpEventType.UploadProgress) {
++            if (event.total) {
++              this.progress = Math.round((100 * event.loaded) / event.total);
++            } else {
++              console.log('handle illegal state');
++            }
++          } else if (event instanceof HttpResponse) {
++            // lorsque tout s'est bien déroulé
++            this.refreshScreen();
+           }
+-        } else if (event instanceof HttpResponse) { // lorsque tout s'est bien déroulé
+-          this.refreshScreen();
+-        }
+-      },
+-      error: (err) => this.error = "pb de transfert d'image",
+-      complete: () => this.error = ""
+-    });
++        },
++        error: (err) => (this.error = "pb de transfert d'image"),
++        complete: () => (this.error = ''),
++      });
+   }
+-  
++
+   getStars(stars: number): number[] {
+     return Array(stars).fill(0);
+   }
+diff --git a/src/app/model/mocks/hotelMock.ts b/src/app/model/mocks/hotelMock.ts
+new file mode 100644
+index 0000000..1d07179
+--- /dev/null
++++ b/src/app/model/mocks/hotelMock.ts
+@@ -0,0 +1,14 @@
++import { City } from '../city.model';
++import { Hotel } from '../hotel.model';
++
++export const mockHotel = new Hotel(
++  1,
++  'Mon Hotel',
++  'desc',
++  '10 rue',
++  '0615487489',
++  5,
++  100,
++  200,
++  new City(1, 'Marrakesh')
++);
+diff --git a/src/app/services/api.service.mock.ts b/src/app/services/api.service.mock.ts
+new file mode 100644
+index 0000000..e8293ea
+--- /dev/null
++++ b/src/app/services/api.service.mock.ts
+@@ -0,0 +1,16 @@
++import { Observable, of } from 'rxjs';
++import { Hotel } from '../model/hotel.model';
++import { mockHotel } from '../model/mocks/hotelMock';
++import { City } from '../model/city.model';
++
++export class ApiServiceMock {
++  public getHotels(): Observable<Hotel[]> {
++    return of([mockHotel, mockHotel, mockHotel]);
++  }
++  public getCities(): Observable<City[]> {
++    return of([{ id: 1, name: 'marrakesh' }]);
++  }
++  public getHotelById(): Observable<Hotel> {
++    return of(mockHotel);
++  }
++}
+diff --git a/src/app/services/api.service.spec.ts b/src/app/services/api.service.spec.ts
+index c0310ae..a3efa7d 100644
+--- a/src/app/services/api.service.spec.ts
++++ b/src/app/services/api.service.spec.ts
+@@ -1,12 +1,14 @@
+import { TestBed } from '@angular/core/testing';
+-
++import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ApiService } from './api.service';
+describe('ApiService', () => {
+   let service: ApiService;
+   beforeEach(() => {
+-    TestBed.configureTestingModule({});
++    TestBed.configureTestingModule({
++      imports: [HttpClientTestingModule],
++    });
+     service = TestBed.inject(ApiService);
+   });
+-- 
+2.31.1.windows.1
